@@ -1,9 +1,6 @@
 #!/bin/bash
 file=$1
 echo Conditioning $file
-rm -f left.txt right.txt
-awk '{print $1>"left.txt"; print $2>"right.txt";}' $file
-sort left.txt > sleft.txt
-sort right.txt > sright.txt
+awk '{print $1|"sort > sleft.txt"; print $2|"sort > sright.txt";}' $file
 paste sleft.txt sright.txt > ${file%.txt}_conditioned.txt
-rm left.txt sleft.txt right.txt sright.txt
+rm sleft.txt sright.txt
