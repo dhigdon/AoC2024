@@ -3,12 +3,9 @@
 
 function safe( skipindex,   idx,last,diff,dir ) {
    # Startup is a bit tricky with skipindex
-   switch( skipindex )
-   {
-   case 1: idx=3;last=$2; break
-   case 2: idx=3;last=$1; break
-   default: idx=2;last=$1; break
-   }
+   if( skipindex == 1 ) { idx=3; last=$2 }
+   else if (skipindex == 2 ) { idx=3; last=$1 }
+   else { idx=2; last=$1 }
 
    # Figure the direction this "run" goes in
    if( last < $idx ) dir = -1
