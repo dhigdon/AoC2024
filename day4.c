@@ -1,9 +1,9 @@
 // Advent of Code 2024, Day 4 - Ceres Search
 // by Dan Higdon
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 // The map is a square matrix of characters
 char key[] = "XMAS";
@@ -12,7 +12,7 @@ int mapSpan = 0;
 
 int in_range( int v ) { return v >= 0 && v < mapSpan; }
 
-char index( int x, int y )
+char idx( int x, int y )
 {
    if ( !in_range( x ) || !in_range( y ) )
       return '\0';
@@ -55,7 +55,7 @@ int count_horizontal()
       for( int col = 0; col < mapSpan; ++col )
       {
          memmove( shift, shift+1, 3 );
-         shift[3] = index( col, row );
+         shift[3] = idx( col, row );
          if( strncmp( key, shift, 4 ) == 0 ) ++result;
       }
       // backwards
@@ -63,7 +63,7 @@ int count_horizontal()
       for( int col = mapSpan - 1; col >= 0; --col )
       {
          memmove( shift, shift+1, 3 );
-         shift[3] = index( col, row );
+         shift[3] = idx( col, row );
          if( strncmp( key, shift, 4 ) == 0 ) ++result;
       }
    }
@@ -83,7 +83,7 @@ int count_vertical()
       for( int col = 0; col != mapSpan; ++col )
       {
          memmove( shift, shift+1, 3 );
-         shift[3] = index( row, col );
+         shift[3] = idx( row, col );
          if( strncmp( key, shift, 4 ) == 0 ) ++result;
       }
       // Up
@@ -91,7 +91,7 @@ int count_vertical()
       for( int col = mapSpan - 1; col >= 0; --col )
       {
          memmove( shift, shift+1, 3 );
-         shift[3] = index( row, col );
+         shift[3] = idx( row, col );
          if( strncmp( key, shift, 4 ) == 0 ) ++result;
       }
    }
@@ -111,14 +111,14 @@ int count_diagonal_left()
       for( int i = 0; i < mapSpan; ++i )
       {
          memmove( shift, shift+1, 3 );
-         shift[3] = index( col + i, i );
+         shift[3] = idx( col + i, i );
          if( strncmp( key, shift, 4 ) == 0 ) ++result;
       }
       memset( shift, 0, sizeof( shift ) );
       for( int i = mapSpan-1; i >= 0; --i )
       {
          memmove( shift, shift+1, 3 );
-         shift[3] = index( col + i, i );
+         shift[3] = idx( col + i, i );
          if( strncmp( key, shift, 4 ) == 0 ) ++result;
       }
       // Up
@@ -138,14 +138,14 @@ int count_diagonal_right()
       for( int i = 0; i < mapSpan; ++i )
       {
          memmove( shift, shift+1, 3 );
-         shift[3] = index( col - i, i );
+         shift[3] = idx( col - i, i );
          if( strncmp( key, shift, 4 ) == 0 ) ++result;
       }
       memset( shift, 0, sizeof( shift ) );
       for( int i = mapSpan-1; i >= 0; --i )
       {
          memmove( shift, shift+1, 3 );
-         shift[3] = index( col - i, i );
+         shift[3] = idx( col - i, i );
          if( strncmp( key, shift, 4 ) == 0 ) ++result;
       }
       // Up
@@ -164,25 +164,25 @@ int count_x()
    {
       for( int col = 1; col < mapSpan-1; ++col )
       {
-         if( index( col, row ) == 'A')
+         if( idx( col, row ) == 'A')
          {
-            if( index( col-1, row-1 ) == 'M')
+            if( idx( col-1, row-1 ) == 'M')
             {
-               if( index( col+1, row+1 ) != 'S' ) continue;
+               if( idx( col+1, row+1 ) != 'S' ) continue;
             }
-            else if( index( col-1, row-1 ) == 'S')
+            else if( idx( col-1, row-1 ) == 'S')
             {
-               if( index( col+1, row+1 ) != 'M' ) continue;
+               if( idx( col+1, row+1 ) != 'M' ) continue;
             }
             else continue;
 
-            if( index( col+1, row-1 ) == 'M' )
+            if( idx( col+1, row-1 ) == 'M' )
             {
-               if( index( col-1, row+1 ) != 'S' ) continue;
+               if( idx( col-1, row+1 ) != 'S' ) continue;
             }
-            else if( index( col+1, row-1 ) == 'S')
+            else if( idx( col+1, row-1 ) == 'S')
             {
-               if( index( col-1, row+1 ) != 'M' ) continue;
+               if( idx( col-1, row+1 ) != 'M' ) continue;
             }
             else continue;
 
