@@ -33,3 +33,5 @@
 
 # Temporary data
 *_conditioned.txt
+
+.gawk*
