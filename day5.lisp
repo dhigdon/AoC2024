@@ -1,59 +1,44 @@
 ;;; Advent of Code 2024, Day 5 - Print Queue
 ;;; by Dan Higdon
 
-(defstruct node id successors)
-
-(defun push-successor (successor node)
-  (push successor (node-successors node)))
-
-(defstruct graph nodes)
-
-(defun find-node (id graph)
-  (gethash id graph))
-
-(defun add-edge (pair graph)
-  "Adds the node if not present, and adds the sucessor connection"
-  (let ((id (car pair))
-        (succ (cdr pair)))
-    (push-successor succ
-                    (or (gethash id graph)
-                        (setf (gethash id graph) (make-node :id id))))))
-
 (defun read-datafile (fname)
-  (let ((graph (make-hash-table))
-        (runs (list)))
-    (with-open-file (file (pathname fname))
+  "Read the pre-conditioned data file, yielding the rules and the books"
+  (with-open-file (file (pathname fname))
+    (values
+      ; Rules
       (loop for v = (read file)
             until (eq v :data)
-            do (add-edge v graph))
+            collecting v)
+      ; Books
       (loop for v = (read file nil)
             until (null v)
-            do (push v runs)))
-    (values graph runs)))
+            collecting v))))
 
+(defun check-rule (a b rules)
+  "Check that b follows a in the rules"
+  (member (cons a b) rules :test #'equal))
 
-(defun find-graph-node (start target graph)
-  (cond ((eq start target) target)
-        ((find-node start graph)
-         (find-if (lambda (x) (find-graph-node x target graph))
-                  (node-successors (find-node start graph))))
-        (t nil)))
+(defun validate (pages rules)
+  "Validate that pages are in the order defined by the rules"
+  (reduce (lambda (l r)
+            (and l (when (check-rule l r rules) r)))
+          pages))
 
-(defun find-graph-node2 (start target graph)
-  (cond ((eq start target) target)
-        ((find-node start graph)
-         (member-if (lambda (x) (find-graph-node x target graph))
-                    (node-successors (find-node start graph))))
-        (t nil)))
+(defun center (l)
+  "Return the center element of l"
+  (nth (round (/ (1- (length l)) 2)) l))
 
-(defun valid-sequence (seq graph)
-  (cond ((numberp seq) t)
-        ((consp seq)
-         (and (find-graph-node (car seq) (cadr seq) graph)
-              (valid-sequence (cdr seq) graph)))
-        (t nil)))
+(defun part1a (filename)
+  "Solution to part 1 - determine which books are sorted"
+  (multiple-value-bind (rules books) (read-datafile filename)
+    (loop for b in books
+          when (validate b rules)
+          summing (center b))))
 
-;; Part 1 - see if all the pages in a run are consecutive 
-;; according to the graph.
-
+(defun part2 (filename)
+  "Solution to part 2 - repair the unsorted books"
+  (multiple-value-bind (rules books) (read-datafile filename)
+    (loop for b in books
+          unless (validate b rules)
+          summing (center (sort b (lambda (l r) (check-rule r l rules)))))))
 
