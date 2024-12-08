@@ -10,6 +10,7 @@ typedef struct Point_
    char id;
    int x, y;
 } Point;
+typedef Point const * const PCPoint;
 
 // NOTE: test data is 50x50
 Point antennae[50 * 50];
@@ -18,12 +19,10 @@ int n_antennae = 0;
 Point nodes[50 * 50 * 2];
 int n_nodes = 0;
 
-int map_width = 0;
-int map_height = 0;
+// NOTE: map is square in the test data....
+int map_size = 0;
 
-void reset() { n_antennae = n_nodes = 0; }
-
-void read( const char * filename )
+void read_map( char const * const filename )
 {
    FILE * pFile = fopen( filename, "ra" );
    Point pt = { '\0', 0, 0 };
@@ -32,19 +31,22 @@ void read( const char * filename )
       int ch = fgetc( pFile );
       switch( ch )
       {
-      case -1:    // EOF
-         map_height = map_width; // HACK
+      case -1:
+         // EOF - finish up
          fclose( pFile );
          pFile = NULL;
          break;
 
-      case '\n':  // EOL
-         map_width = pt.x;
+      case '\n':
+         // all lines should be the same size in the data
+         assert(map_size == 0 || map_size == pt.x );
+         map_size = pt.x;
          pt.x = 0;
          ++pt.y;
          break;
 
-      case '.':   // Empty space
+      case '.':
+         // Skip empty space
          ++pt.x;
          break;
 
@@ -58,35 +60,37 @@ void read( const char * filename )
    }
 }
 
-int in_bounds( const Point * p )
+int in_bounds( PCPoint p )
 {
-   return p->x >= 0 && p->x < map_width
-      &&  p->y >= 0 && p->y < map_height;
+   return p->x >= 0 && p->x < map_size
+      &&  p->y >= 0 && p->y < map_size;
 }
 
-// See if 'p' already has a node
-int is_valid( const Point * p )
+int match_pos( PCPoint a, PCPoint b )
 {
-   // Can't already have a node here
-   for( int i = 0; i < n_nodes; ++i )
-   {
-      const Point * pn = &nodes[ i ];
-      if( pn->x == p->x && pn->y == p->y ) return 0;
-   }
+   return a->x == b->x
+      &&  a->y == b->y;
+}
 
-   // All clear
+// 'p' is valid if there are no nodes present
+int is_valid( PCPoint p )
+{
+   for( int i = 0; i < n_nodes; ++i )
+      if( match_pos( &nodes[ i ], p ) ) return 0;
+
    return 1;
 }
 
-void calc_nodes( const Point * a, const Point * b )
+void calc_nodes( PCPoint a, PCPoint b )
 {
    assert( a && b && a->id == b->id );
    assert( a->x != b->x || a->y != b->y );
 
-   int dx = b->x - a->x;
-   int dy = b->y - a->y;
-   Point node = *a;
+   int const dx = b->x - a->x;
+   int const dy = b->y - a->y;
+   Point node;
 
+   node = *a;
    while( in_bounds( &node ) )
    {
       if ( is_valid( &node ) ) nodes[ n_nodes++ ] = node;
@@ -103,23 +107,21 @@ void calc_nodes( const Point * a, const Point * b )
    }
 }
 
-int part2()
+void main( int argc, char const * const * const argv )
 {
+   read_map( argv[1] );
+
    n_nodes = 0;
    for( int cur = 0; cur < n_antennae; ++cur )
    {
-      const Point * pcur = &antennae[ cur ];
+      PCPoint pcur = &antennae[ cur ];
       for( int i = cur + 1; i < n_antennae; ++i )
       {
-         const Point * p = &antennae[ i ];
+         PCPoint p = &antennae[ i ];
          if( p->id == pcur->id ) calc_nodes( p, pcur );
       }
    }
-}
 
-void main( int argc, char **argv )
-{
-   read( argv[1] );
-   part2();
    printf("Part2 = %d\n", n_nodes );
 }
+
