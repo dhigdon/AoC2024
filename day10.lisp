@@ -7,8 +7,6 @@
 (defun pos-down (pos)   (make-pos :x (pos-x pos) :y (1+ (pos-y pos))))
 (defun pos-left (pos)   (make-pos :x (1- (pos-x pos)) :y (pos-y pos)))
 (defun pos-right (pos)  (make-pos :x (1+ (pos-x pos)) :y (pos-y pos)))
-(defun equal-pos (a b)
-  (and a b (= (pos-x a) (pos-x b)) (= (pos-y a) (pos-y b))))
 
 (defun char-height (ch) (- (char-code ch) (char-code #\0)))
 
@@ -53,11 +51,11 @@
           (setf (aref map y x) (char-height (read-char file))))
         (read-char file)))))
 
-(defun advance-trailheads (heads map &optional (test #'equal-pos))
+(defun advance-trailheads (heads map &optional (test #'equalp))
   (reduce (lambda (a b) (union a b :test test))
           (mapcar (lambda (p) (find-adjacent p map)) heads)))
 
-(defun walk-trail (head map &optional (test #'equal-pos))
+(defun walk-trail (head map &optional (test #'equalp))
   "Walk one trail to completion, and return the number of trails"
   (let ((pos (list head)))
     (dotimes (i 9)
@@ -65,12 +63,12 @@
     (length pos)))
 
 (defun part1 (fname)
-  (let ((m (read-map fname))
-        (hs (find-trailheads m)))
+  (let* ((m (read-map fname))
+         (hs (find-trailheads m)))
     (apply #'+ (mapcar (lambda (h) (walk-trail h m)) hs))))
 
 (defun part2 (fname)
-  (let ((m (read-map fname))
-        (hs (find-trailheads m)))
+  (let* ((m (read-map fname))
+         (hs (find-trailheads m)))
     (apply #'+ (mapcar (lambda (h) (walk-trail h m #'eq)) hs))))
 
