@@ -43,13 +43,15 @@
 
 (defun read-map (fname)
   (with-open-file (file (pathname fname))
-    (let* ((size (length (read-line file)))
+    (let* ((size (length (string-right-trim #(#\Return #\Linefeed)
+                                            (read-line file))))
            (map (make-map size size)))
       (file-position file :start)
       (dotimes (y size map)
         (dotimes (x size)
           (setf (aref map y x) (char-height (read-char file))))
-        (read-char file)))))
+        (when (char= #\Return (read-char file))
+          (read-char file))))))
 
 (defun advance-trailheads (heads map &optional (test #'equalp))
   (reduce (lambda (a b) (union a b :test test))
